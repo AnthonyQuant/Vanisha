@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="description" content="Vanisha — Privacy-First Distraction-Free Disappearing Text Writing Challenge">
+    <title>Vanisha — Distraction-Free Writing</title>
+
+    <!-- PWA Manifest & App Icons -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/feather-pointed.svg">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CSS System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="theme-midnight">
+    <!-- Danger Vignette & Grace Banner Overlay -->
+    <div id="danger-vignette" class="danger-vignette"></div>
+    <div id="practice-grace-banner" class="grace-banner hidden">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> Grace Period Active! Keep typing to save your text!
+    </div>
+
+    <!-- Milestone Toast Notifications -->
+    <div id="milestone-toast-container" class="toast-container"></div>
+
+    <!-- Top Header Navigation -->
+    <header class="app-header">
+        <div class="brand-group">
+            <div class="brand-logo" id="brand-home-logo" style="cursor: pointer;">
+                <i class="fa-solid fa-feather-pointed me-2 brand-icon"></i>Vanisha
+            </div>
+            <span class="brand-divider">|</span>
+            <span class="brand-tagline">Write before it disappears.</span>
+        </div>
+
+        <nav class="main-nav">
+            <button class="nav-link active" id="nav-home-btn">
+                <i class="fa-solid fa-house me-1"></i> Home
+            </button>
+            <button class="nav-link" id="nav-analytics-btn">
+                <i class="fa-solid fa-chart-column me-1"></i> Analytics
+            </button>
+            <button class="nav-link" id="nav-history-btn">
+                <i class="fa-solid fa-clock-rotate-left me-1"></i> History
+            </button>
+            <button class="nav-link" id="nav-settings-btn">
+                <i class="fa-solid fa-gear me-1"></i> Settings
+            </button>
+            <button class="nav-profile-btn" title="User Profile">
+                <i class="fa-solid fa-circle-user"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- MAIN HOME LANDING VIEW (Screen 4) -->
+    <div id="home-view" class="view-container">
+        <div class="hero-section">
+            <h1 class="hero-title">
+                The <span class="text-glow-purple">Disappearing</span> Text<br>Writing Challenge
+            </h1>
+            <p class="hero-subtitle">
+                Write continuously. Keep your momentum. Don't let your words vanish.
+            </p>
+
+            <!-- Mode Selection Cards Grid -->
+            <div class="mode-cards-grid" id="mode-selector">
+                <div class="mode-card active" data-mode="classic">
+                    <div class="popular-badge"><i class="fa-solid fa-star me-1"></i> Most Popular</div>
+                    <div class="mode-icon-box icon-purple">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="mode-card-title">Classic Mode</h3>
+                    <p class="mode-card-desc">Stop typing for the set time and lose your text.</p>
+                    <div class="mode-card-setting">
+                        <i class="fa-regular fa-clock me-1"></i>
+                        <select id="classic-time-select" class="card-select">
+                            <option value="15">Default: 15s</option>
+                            <option value="5">Fast: 5s</option>
+                            <option value="10">Medium: 10s</option>
+                            <option value="20">Relaxed: 20s</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mode-card" data-mode="sprint">
+                    <div class="mode-icon-box icon-indigo">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <h3 class="mode-card-title">Sprint Mode</h3>
+                    <p class="mode-card-desc">Write for a fixed duration and reach your goal.</p>
+                    <div class="mode-card-setting">
+                        <i class="fa-regular fa-clock me-1"></i>
+                        <select id="sprint-time-select" class="card-select">
+                            <option value="300">Choose: 5 min</option>
+                            <option value="600">Choose: 10 min</option>
+                            <option value="1200">Choose: 20 min</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mode-card" data-mode="practice">
+                    <div class="mode-icon-box icon-green">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <h3 class="mode-card-title">Practice Mode</h3>
+                    <p class="mode-card-desc">Get a warning and a grace period before your text disappears.</p>
+                    <div class="mode-card-setting">
+                        <i class="fa-regular fa-clock me-1"></i>
+                        <select id="practice-grace-select" class="card-select">
+                            <option value="5">Grace: 5s</option>
+                            <option value="3">Grace: 3s</option>
+                            <option value="10">Grace: 10s</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary Action CTA -->
+            <div class="hero-cta-container">
+                <button id="start-challenge-btn" class="btn-start-hero">
+                    <i class="fa-solid fa-play me-2"></i> Start Writing Challenge <i class="fa-solid fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Feature Cards Grid -->
+        <div class="feature-cards-grid">
+            <div class="feature-card">
+                <div class="feature-card-content">
+                    <div class="feature-header">
+                        <i class="fa-solid fa-chart-line feature-icon text-purple"></i>
+                        <h4>Track Your Progress</h4>
+                    </div>
+                    <p>View detailed analytics and see how you improve.</p>
+                    <button class="btn-feature-link" id="feature-analytics-btn">
+                        View Analytics <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+                <div class="feature-graphic-box">
+                    <svg class="graph-svg" viewBox="0 0 100 60">
+                        <rect x="10" y="35" width="10" height="25" rx="3" fill="#6366f1" opacity="0.4"/>
+                        <rect x="30" y="25" width="10" height="35" rx="3" fill="#8b5cf6" opacity="0.6"/>
+                        <rect x="50" y="15" width="10" height="45" rx="3" fill="#a855f7" opacity="0.8"/>
+                        <rect x="70" y="5" width="10" height="55" rx="3" fill="#c084fc"/>
+                        <path d="M 15 35 Q 35 25, 55 15 T 75 5" fill="none" stroke="#a855f7" stroke-width="3"/>
+                        <polygon points="73,0 80,5 73,10" fill="#a855f7"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-card-content">
+                    <div class="feature-header">
+                        <i class="fa-solid fa-lightbulb feature-icon text-indigo"></i>
+                        <h4>Try a Prompt</h4>
+                    </div>
+                    <p>Need inspiration? Generate a random writing prompt.</p>
+                    <button class="btn-feature-link" id="feature-prompt-btn">
+                        Get Prompt <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+                <div class="feature-quote-box">
+                    <p class="quote-preview">“Describe a world where people can only remember the last 24 hours.”</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-card-content">
+                    <div class="feature-header">
+                        <i class="fa-solid fa-trophy feature-icon text-gold"></i>
+                        <h4>Earn Milestones</h4>
+                    </div>
+                    <p>Reach word milestones and unlock achievements.</p>
+                    <button class="btn-feature-link" id="feature-milestones-btn">
+                        View Achievements <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+                <div class="feature-trophy-box">
+                    <div class="trophy-badge-glow">
+                        <i class="fa-solid fa-award trophy-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="home-footer">
+            <div class="footer-privacy">
+                <i class="fa-solid fa-shield-halved text-cyan me-2"></i>
+                <span>Your privacy matters — your writing stays in your browser.</span>
+            </div>
+            <div class="footer-tags">
+                <span class="footer-tag"><i class="fa-solid fa-keyboard me-1"></i> Distraction-Free</span>
+                <span class="footer-tag"><i class="fa-solid fa-bolt me-1"></i> Performance Insights</span>
+                <span class="footer-tag"><i class="fa-solid fa-lock me-1"></i> 100% Private</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SCREEN 2: STORY PROMPT GENERATOR VIEW -->
+    <div id="prompt-generator-view" class="view-container hidden">
+        <div class="prompt-gen-card">
+            <h2 class="screen-title">Story Prompt Generator</h2>
+
+            <div class="story-settings-box">
+                <h3 class="settings-subtitle">Story Settings</h3>
+
+                <div class="setting-row">
+                    <label for="screen2-length-select">Story Length:</label>
+                    <select id="screen2-length-select" class="screen2-select">
+                        <option value="Flash Fiction">Flash Fiction</option>
+                        <option value="Short Story">Short Story</option>
+                        <option value="Novella">Novella</option>
+                        <option value="all">Any Length</option>
+                    </select>
+                </div>
+
+                <div class="setting-row">
+                    <label for="screen2-genre-select">Genre:</label>
+                    <select id="screen2-genre-select" class="screen2-select">
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Mystery">Mystery</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Horror">Horror</option>
+                        <option value="all">All Genres</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-generate-wrapper">
+                <button id="screen2-generate-btn" class="btn-generate-blue">Generate Prompt</button>
+            </div>
+
+            <div class="prompt-output-box">
+                <span class="output-label">Your Writing Prompt:</span>
+                <p id="screen2-prompt-display" class="output-text">Click "Generate Prompt" above to generate your customized writing prompt!</p>
+            </div>
+            <div style="text-align: center; margin-top: 1rem;">
+                <button id="start-prompt-challenge-btn" class="btn-start-hero" style="padding: 0.8rem 2rem; font-size: 0.95rem;">
+                    <i class="fa-solid fa-feather-pointed me-2"></i> Write With This Prompt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIVE WRITING EDITOR WORKSPACE -->
+    <div id="editor-view" class="view-container hidden">
+        <div id="active-prompt-banner" class="active-prompt-banner hidden">
+            <i class="fa-solid fa-lightbulb me-2 text-indigo"></i> <span id="active-prompt-text"></span>
+        </div>
+
+        <div id="sprint-goal-container" class="sprint-goal-bar hidden">
+            <div class="sprint-info">
+                <span>Sprint Target: <strong id="sprint-target-display">300</strong> words</span>
+                <span>Sprint Time: <strong id="sprint-time-display">05:00</strong></span>
+            </div>
+            <div class="progress-track">
+                <div id="sprint-progress-fill" class="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <main class="editor-container">
+            <textarea id="writing-canvas" class="editor-textarea" placeholder="Start typing to begin your session... Keep writing, don't break momentum!"></textarea>
+        </main>
+
+        <footer class="bottom-bar">
+            <div class="metric-group">
+                <div class="metric-item">Words: <span id="stat-words">0</span></div>
+                <div class="metric-item">Chars: <span id="stat-chars">0</span></div>
+                <div class="metric-item">WPM: <span id="stat-wpm">0</span></div>
+                <div class="metric-item">Time: <span id="stat-timer">00:00</span></div>
+                <div class="metric-item">Mode: <span id="stat-mode-badge" class="badge-mode">Classic</span></div>
+            </div>
+            <div class="status-indicator">
+                <span id="session-status-text"><i class="fa-solid fa-circle text-success me-1"></i> Ready</span>
+                <button id="finish-session-btn" class="btn-finish ms-3"><i class="fa-solid fa-check me-1"></i> Finish</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Summary Modal -->
+    <div id="summary-modal" class="modal-backdrop hidden">
+        <div class="summary-card">
+            <div class="summary-header">
+                <h2><i class="fa-solid fa-square-poll-vertical me-2 text-indigo"></i> Session Complete!</h2>
+                <button id="modal-close-btn" class="btn-close-sm">&times;</button>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-stat-box">
+                    <span class="stat-label">Total Words</span>
+                    <span id="summary-words" class="stat-value">0</span>
+                </div>
+                <div class="summary-stat-box">
+                    <span class="stat-label">Characters</span>
+                    <span id="summary-chars" class="stat-value">0</span>
+                </div>
+                <div class="summary-stat-box">
+                    <span class="stat-label">Duration</span>
+                    <span id="summary-duration" class="stat-value">00:00</span>
+                </div>
+                <div class="summary-stat-box">
+                    <span class="stat-label">Avg WPM</span>
+                    <span id="summary-avg-wpm" class="stat-value">0</span>
+                </div>
+                <div class="summary-stat-box">
+                    <span class="stat-label">Peak WPM</span>
+                    <span id="summary-peak-wpm" class="stat-value">0</span>
+                </div>
+                <div class="summary-stat-box">
+                    <span class="stat-label">Pauses</span>
+                    <span id="summary-pauses" class="stat-value">0</span>
+                </div>
+                <div class="summary-stat-box full-width">
+                    <span class="stat-label">Longest Typing Streak</span>
+                    <span id="summary-streak" class="stat-value text-cyan">0s</span>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="wpm-chart"></canvas>
+            </div>
+            <div class="export-actions">
+                <button id="export-txt-btn" class="btn-export btn-txt"><i class="fa-solid fa-file-lines me-1"></i> Export .TXT</button>
+                <button id="export-md-btn" class="btn-export btn-md"><i class="fa-solid fa-file-code me-1"></i> Export .MD</button>
+                <button id="modal-continue-btn" class="btn-secondary">New Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard Modal -->
+    <div id="analytics-modal" class="modal-backdrop hidden">
+        <div class="summary-card history-modal-card">
+            <div class="summary-header">
+                <h2><i class="fa-solid fa-chart-line me-2 text-purple"></i> Writing Velocity & Performance Insights</h2>
+                <button id="analytics-modal-close-btn" class="btn-close-sm">&times;</button>
+            </div>
+            <div class="chart-wrapper" style="height: 220px;">
+                <canvas id="analytics-trend-chart"></canvas>
+            </div>
+            <div class="history-stats-bar" style="margin-top: 1rem;">
+                <div class="history-badge">
+                    <span class="h-badge-label">Classic Sessions</span>
+                    <span id="analytics-classic-count" class="h-badge-val">0</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Sprint Sessions</span>
+                    <span id="analytics-sprint-count" class="h-badge-val">0</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Practice Sessions</span>
+                    <span id="analytics-practice-count" class="h-badge-val">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Dashboard Modal -->
+    <div id="history-modal" class="modal-backdrop hidden">
+        <div class="summary-card history-modal-card">
+            <div class="summary-header">
+                <h2><i class="fa-solid fa-clock-rotate-left me-2 text-indigo"></i> Writing History</h2>
+                <button id="history-modal-close-btn" class="btn-close-sm">&times;</button>
+            </div>
+            <div class="history-stats-bar">
+                <div class="history-badge">
+                    <span class="h-badge-label">Lifetime Words</span>
+                    <span id="life-words" class="h-badge-val">0</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Total Sessions</span>
+                    <span id="life-sessions" class="h-badge-val">0</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Avg Speed</span>
+                    <span id="life-wpm" class="h-badge-val">0 WPM</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Completion Rate</span>
+                    <span id="life-rate" class="h-badge-val">0%</span>
+                </div>
+            </div>
+            <div id="history-logs-container" class="history-logs-list">
+                <p class="empty-history-text">Loading history data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Settings Modal -->
+    <div id="settings-modal" class="modal-backdrop hidden">
+        <div class="summary-card">
+            <div class="summary-header">
+                <h2><i class="fa-solid fa-gear me-2 text-purple"></i> Application Settings</h2>
+                <button id="settings-modal-close-btn" class="btn-close-sm">&times;</button>
+            </div>
+            <div class="story-settings-box" style="background: rgba(30, 41, 59, 0.6); border-color: var(--border-color);">
+                <div class="setting-row" style="justify-content: space-between;">
+                    <label style="color: var(--text-primary);"><i class="fa-solid fa-palette me-2 text-indigo"></i> Visual Theme:</label>
+                    <select id="theme-select" class="screen2-select" style="background: rgba(15, 23, 42, 0.85); color: var(--text-primary); border-color: var(--border-color);">
+                        <option value="theme-midnight">Midnight Purple (Default)</option>
+                        <option value="theme-cyberpunk">Cyberpunk Neon</option>
+                        <option value="theme-sepia">Vintage Sepia</option>
+                        <option value="theme-monokai">Monokai Dark</option>
+                    </select>
+                </div>
+                <div class="setting-row" style="justify-content: space-between; margin-top: 0.75rem;">
+                    <label style="color: var(--text-primary);"><i class="fa-solid fa-cloud-rain me-2 text-cyan"></i> Ambient Audio:</label>
+                    <select id="ambient-sound-select" class="screen2-select" style="background: rgba(15, 23, 42, 0.85); color: var(--text-primary); border-color: var(--border-color);">
+                        <option value="off">Mute Ambient Audio</option>
+                        <option value="rain">Gentle Rain</option>
+                        <option value="waves">Ocean Waves</option>
+                        <option value="brown">Deep Focus Hum</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile & Goals Dashboard Modal -->
+    <div id="profile-modal" class="modal-backdrop hidden">
+        <div class="summary-card history-modal-card" style="max-width: 650px;">
+            <div class="summary-header">
+                <h2><i class="fa-solid fa-circle-user me-2 text-cyan"></i> User Profile & Writing Summary</h2>
+                <button id="profile-modal-close-btn" class="btn-close-sm">&times;</button>
+            </div>
+            <div class="history-stats-bar">
+                <div class="history-badge">
+                    <span class="h-badge-label">Total Words</span>
+                    <span id="profile-words-total" class="h-badge-val">0</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Sessions</span>
+                    <span id="profile-sessions-total" class="h-badge-val">0</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Avg Speed</span>
+                    <span id="profile-wpm-avg" class="h-badge-val">0 WPM</span>
+                </div>
+                <div class="history-badge">
+                    <span class="h-badge-label">Completion</span>
+                    <span id="profile-completion-rate" class="h-badge-val">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements & Milestones Modal -->
+    <div id="achievements-modal" class="modal-backdrop hidden">
+        <div class="summary-card history-modal-card" style="max-width: 600px;">
+            <div class="summary-header">
+                <h2><i class="fa-solid fa-trophy me-2 text-gold"></i> Milestones & Badges</h2>
+                <button id="achievements-modal-close-btn" class="btn-close-sm">&times;</button>
+            </div>
+            <div class="summary-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="summary-stat-box" style="align-items: center; text-align: center; padding: 1.25rem;">
+                    <i class="fa-solid fa-award text-gold" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <span class="stat-value">100 Words</span>
+                    <span class="stat-label">Novice Wordsmith</span>
+                </div>
+                <div class="summary-stat-box" style="align-items: center; text-align: center; padding: 1.25rem;">
+                    <i class="fa-solid fa-medal text-cyan" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <span class="stat-value">250 Words</span>
+                    <span class="stat-label">Focus Sprinter</span>
+                </div>
+                <div class="summary-stat-box" style="align-items: center; text-align: center; padding: 1.25rem;">
+                    <i class="fa-solid fa-crown text-purple" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <span class="stat-value">500 Words</span>
+                    <span class="stat-label">Flow Master</span>
+                </div>
+                <div class="summary-stat-box" style="align-items: center; text-align: center; padding: 1.25rem;">
+                    <i class="fa-solid fa-fire text-warning" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <span class="stat-value">1,000 Words</span>
+                    <span class="stat-label">Unstoppable Author</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('ServiceWorker registered:', reg.scope))
+                    .catch(err => console.error('ServiceWorker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
